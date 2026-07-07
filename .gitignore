@@ -1,0 +1,17 @@
+__pycache__/  
+*.pyc  
+.env  
+.venv/  
+.idea/  
+.vscode/  
+.pytest_cache/  
+postgres_data/
+*.egg-info/  
+.coverage  
+htmlcov/  
+.mypy_cache/  
+.ruff_cache/
+.coverage.*  
+.pyre/  
+.DS_Store  
+Thumbs.db
