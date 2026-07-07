@@ -1,0 +1,19 @@
+services:
+  postgres:
+    ports:
+      - "5432:5432" # Открываем базу только для локальной разработки
+
+  app:
+    volumes:
+      - .:/code # Монтируем исходники для hot-reload
+      - /code/.venv
+    env_file:
+      - .env # Локальные переменные
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --reload # Включаем автоперезапуск кода

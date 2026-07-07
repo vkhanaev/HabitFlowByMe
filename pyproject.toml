@@ -1,12 +1,27 @@
+# ==========================================
+# 1. Метаданные проекта
+# ==========================================
 [project]
 name = "habitflowbyme"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
+
+# ==========================================
+# 2. Основные зависимости (Runtime)
+# ==========================================
 dependencies = [
+    # Web Framework
     "fastapi>=0.139.0",
     "uvicorn[standard]>=0.50.2",
+
+    # Database & ORM
+    "asyncpg>=0.31.0",
+    "sqlalchemy>=2.0.51",
+
+    # Validation & Settings
+    "pydantic-settings>=2.14.2",
 ]
 
 [dependency-groups]
@@ -28,7 +43,9 @@ target-version = "py313" # Укажите вашу версию Python (напр
 [tool.ruff.lint]
 # Включаем правила: E/W (Pycodestyle), F (Pyflakes), I (Isort)
 select = ["E", "F", "I",  "UP", "B", "SIM"]
-ignore = [] # Сюда можно вписать коды ошибок, которые нужно игнорировать
+ignore = [  # Сюда можно вписать коды ошибок, которые нужно игнорировать
+    "B008", # FastAPI Depends() uses function calls in parameter defaults
+] 
 
 # =========================================================================
 # НАСТРОЙКА PYTEST (Замена pytest.ini)
