@@ -6,7 +6,7 @@ name = "habitflowbyme"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 
 # ==========================================
 # 2. Основные зависимости (Runtime)
@@ -36,7 +36,7 @@ dev = [
 # =========================================================================
 [tool.ruff]
 line-length = 88 # Стандартная длина строки (как в Black)
-target-version = "py313" # Укажите вашу версию Python (например, py310, py312)
+target-version = "py312" # Укажите вашу версию Python (например, py310, py312)
 
 [tool.ruff.lint]
 # Включаем правила: E/W (Pycodestyle), F (Pyflakes), I (Isort)

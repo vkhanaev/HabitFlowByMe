@@ -1,5 +1,5 @@
 # --- Этап 1: Сборка зависимостей ---
-FROM python:3.13-slim AS builder
+FROM python:3.12-slim AS builder
 
 # Копируем бинарники uv из официального образа в builder
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
@@ -18,7 +18,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --no-install-project
 
 # --- Этап 2: Финальный легковесный образ ---
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 WORKDIR /code
 
