@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies import get_db
+from app.db.dependencies import get_db
 
 router = APIRouter(
     prefix="/api",
@@ -11,11 +11,11 @@ router = APIRouter(
 
 
 @router.get("/health")
-async def healthcheck():
+async def healthcheck() -> dict[str, str]:
     return {"status": "ok"}
 
 
 @router.get("/db/health")
-async def healthcheck_db(db: AsyncSession = Depends(get_db)):
+async def healthcheck_db(db: AsyncSession = Depends(get_db)) -> dict[str, str]:
     await db.execute(text("SELECT 1"))
     return {"status": "ok"}
