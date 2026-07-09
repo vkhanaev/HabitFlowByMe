@@ -3,6 +3,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 # Import models so Alembic can discover metadata.
+import app.db.models  # noqa: F401
 from alembic import context
 from app.core.config import get_settings
 from app.db.base import Base
