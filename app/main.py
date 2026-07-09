@@ -2,10 +2,8 @@ from fastapi import FastAPI
 
 from app.api.router import router
 from app.core.config import get_settings
-from app.core.logging import setup_logging
+from app.core.lifespan import lifespan
 
-setup_logging()
-
-app = FastAPI(title=get_settings().app_name)
+app = FastAPI(title=get_settings().app_name, lifespan=lifespan)
 
 app.include_router(router)
