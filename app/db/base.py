@@ -1,11 +1,21 @@
 from datetime import datetime
 
-from sqlalchemy import func
+from sqlalchemy import MetaData, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+# SQLAlchemy будет генерировать понятные имена:
+# ix_users_email, uq_users_email, fk_habits_user_id_users
+convention = {
+    "ix": "ix_%(column_0_label)s",
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s",
+}
 
 
 class Base(DeclarativeBase):
-    pass
+    metadata = MetaData(naming_convention=convention)
 
 
 class TimestampMixin:

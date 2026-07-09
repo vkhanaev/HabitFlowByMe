@@ -28,6 +28,19 @@ done
 
 echo "Database is ready."
 
-echo "Starting application..."
+echo "Acquiring exclusive lock for migrations..."
 
+# Экспортируем пароль, чтобы psql мог аутентифицироваться
+export PGPASSWORD="$DATABASE_PASSWORD"
+
+# Держим сессию psql открытой через heredoc
+psql -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$DATABASE_USER" -d "$DATABASE_NAME" -v ON_ERROR_STOP=1 <<EOF
+   SELECT pg_advisory_lock(987654321);
+   \! alembic upgrade head
+   SELECT pg_advisory_unlock(987654321);
+EOF
+
+echo "Migrations completed."
+
+echo "Starting application..."
 exec "$@"
