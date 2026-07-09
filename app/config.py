@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -15,6 +16,8 @@ class Settings(BaseSettings):
 
     secret_key: str = Field(validation_alias="SECRET_KEY")
     algorithm: str = Field("HS256", validation_alias="ALGORITHM")
+
+    log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
     @property
     def database_url(self) -> str:
