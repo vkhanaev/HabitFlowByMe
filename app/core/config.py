@@ -30,6 +30,8 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    access_token_expire_minutes: int = 60
+
 
 @lru_cache
 def get_settings() -> Settings:
