@@ -59,6 +59,9 @@ jobs:
       - name: Check formatting
         run: uv run ruff format --check .
 
+      - name: Run Mypy
+        run: uv run mypy app/
+
       - name: Run Tests
         run: uv run pytest
 
