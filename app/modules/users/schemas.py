@@ -1,9 +1,11 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
 
+from app.core.types import Password
+
 
 class RegisterRequest(BaseModel):
     email: EmailStr
-    password: str
+    password: Password
 
 
 class UserResponse(BaseModel):
