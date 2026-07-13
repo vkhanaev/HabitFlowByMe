@@ -1,20 +1,17 @@
-from fastapi import HTTPException, status
+class DomainException(Exception):
+    """Базовый класс для всех бизнес-исключений. Не знает ничего про HTTP."""
+
+    pass
 
 
-class AppException(HTTPException):
-    def __init__(self, status_code: int, detail: str) -> None:
-        super().__init__(status_code=status_code, detail=detail)
+class UserAlreadyExistsError(DomainException):
+    pass
 
 
-class UserAlreadyExistsError(AppException):
+class InvalidCredentialsError(DomainException):
+    pass
+
+
+class HabitNotFoundError(DomainException):
     def __init__(self) -> None:
-        super().__init__(
-            status_code=status.HTTP_409_CONFLICT, detail="User already exists"
-        )
-
-
-class InvalidCredentialsError(AppException):
-    def __init__(self) -> None:
-        super().__init__(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
-        )
+        super().__init__("Habit not found")

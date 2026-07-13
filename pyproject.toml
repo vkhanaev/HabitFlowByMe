@@ -50,6 +50,7 @@ target-version = "py312" # Укажите вашу версию Python (напр
 select = ["E", "F", "I",  "UP", "B", "SIM"]
 ignore = [  # Сюда можно вписать коды ошибок, которые нужно игнорировать
     "B008", # FastAPI Depends() uses function calls in parameter defaults
+    "E501", # E501 - слишком длинная строка
 ]
 
 [tool.ruff.lint.per-file-ignores]
