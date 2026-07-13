@@ -3,11 +3,13 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.deps import get_db
+from app.modules.habits.router import router as habits_router
 from app.modules.users.router import router as auth_router
 
 router = APIRouter(prefix="/api")
 
 router.include_router(auth_router)
+router.include_router(habits_router)
 
 
 @router.get("/health")
