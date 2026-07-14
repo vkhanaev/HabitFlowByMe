@@ -31,10 +31,14 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "factory-boy>=3.3.3",
+    "httpx>=0.28.1",
     "httpx2>=2.5.0",
     "mypy>=2.2.0",
     "pre-commit>=4.6.0",
     "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-dotenv>=0.5.2",
     "ruff>=0.15.20",
 ]
 
@@ -64,6 +68,9 @@ ignore = [  # Сюда можно вписать коды ошибок, кото
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 pythonpath = ["."]
+env_files = [".env.test"]
+asyncio_mode = "auto" # Автоматически определяет async фикстуры
+asyncio_default_fixture_loop_scope = "function" # Убирает warnings в новых версиях pytest-asyncio
 
 # =========================================================================
 # НАСТРОЙКА MYPY

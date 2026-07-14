@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  checks:
+  tests:
     runs-on: ubuntu-latest
 
     env:
@@ -20,6 +20,7 @@ jobs:
       DATABASE_USER: test_user
       DATABASE_PASSWORD: test_password
       SECRET_KEY: test_secret_key_12345
+      LOG_LEVEL: WARNING  # Отключаем спам логов в CI
 
     services:
       postgres:
@@ -53,26 +54,27 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Run Ruff
+      - name: Run Ruff (Lint)
         run: uv run ruff check .
 
-      - name: Check formatting
+      - name: Run Ruff (Format)
         run: uv run ruff format --check .
 
       - name: Run Mypy
         run: uv run mypy app/
 
+      - name: Apply Database Migrations
+        run: uv run alembic upgrade head
+
+      - name: Check for missing migrations
+        run: uv run alembic check
+
       - name: Run Tests
         run: uv run pytest
 
-      - name: Check for missing migrations
-        run: |
-          uv run alembic upgrade head
-          uv run alembic check
-
   docker:
     runs-on: ubuntu-latest
-    needs: checks
+    needs: tests
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

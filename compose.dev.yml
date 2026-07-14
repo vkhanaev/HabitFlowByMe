@@ -3,6 +3,21 @@ services:
     ports:
       - "5432:5432" # Открываем базу только для локальной разработки
 
+  # Отдельный контейнер для тестовой БД
+  postgres-test:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: habitflowbyme_test
+      POSTGRES_USER: habitflowbyme
+      POSTGRES_PASSWORD: habitflowbyme
+    ports:
+      - "5433:5432"  # 🔑 Другой порт, чтобы не конфликтовать с dev-БД
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U habitflowbyme -d habitflowbyme_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   app:
     volumes:
       - .:/code # Монтируем исходники для hot-reload
