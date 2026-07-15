@@ -5,6 +5,9 @@ from fastapi.responses import JSONResponse
 
 from app.core.exceptions import (
     DomainException,
+    FutureLogDateError,
+    HabitAlreadyLoggedError,
+    HabitArchivedError,
     HabitNotFoundError,
     InvalidCredentialsError,
     UserAlreadyExistsError,
@@ -54,4 +57,31 @@ def register_exception_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"detail": str(exc) or "Business logic error occurred"},
+        )
+
+    @app.exception_handler(HabitAlreadyLoggedError)
+    async def habit_already_logged_handler(
+        _request: Request, exc: HabitAlreadyLoggedError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={"detail": "Habit already logged for this date"},
+        )
+
+    @app.exception_handler(HabitArchivedError)
+    async def habit_archived_handler(
+        _request: Request, exc: HabitArchivedError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": "Cannot log an archived habit"},
+        )
+
+    @app.exception_handler(FutureLogDateError)
+    async def future_log_date_handler(
+        _request: Request, exc: FutureLogDateError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": "Cannot log habits for future dates"},
         )

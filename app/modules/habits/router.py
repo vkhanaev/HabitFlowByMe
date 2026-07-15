@@ -1,8 +1,17 @@
+import datetime
+
 from fastapi import APIRouter, Depends, status
 
 from app.api.deps import get_current_user
 from app.modules.habits.di import get_habit_service
-from app.modules.habits.schemas import HabitCreate, HabitResponse, HabitUpdate
+from app.modules.habits.schemas import (
+    HabitCreate,
+    HabitLogCreate,
+    HabitLogResponse,
+    HabitResponse,
+    HabitStatsResponse,
+    HabitUpdate,
+)
 from app.modules.habits.services import HabitService
 from app.modules.users.models import User
 
@@ -57,3 +66,28 @@ async def delete_habit(
     user: User = Depends(get_current_user),
 ) -> None:
     await service.delete_habit(habit_id, user.id)
+
+
+@router.post(
+    "/{habit_id}/log",
+    response_model=HabitLogResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def log_habit(
+    habit_id: int,
+    payload: HabitLogCreate,
+    service: HabitService = Depends(get_habit_service),
+    user: User = Depends(get_current_user),
+) -> HabitLogResponse:
+    target_date = payload.log_date or datetime.date.today()
+    log = await service.log_completion(habit_id, user.id, target_date)
+    return HabitLogResponse.model_validate(log)
+
+
+@router.get("/{habit_id}/stats", response_model=HabitStatsResponse)
+async def get_habit_stats(
+    habit_id: int,
+    service: HabitService = Depends(get_habit_service),
+    user: User = Depends(get_current_user),
+) -> HabitStatsResponse:
+    return await service.get_habit_stats(habit_id, user.id)

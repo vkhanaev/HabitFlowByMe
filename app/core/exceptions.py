@@ -1,6 +1,4 @@
 class DomainException(Exception):
-    """Базовый класс для всех бизнес-исключений. Не знает ничего про HTTP."""
-
     pass
 
 
@@ -15,3 +13,18 @@ class InvalidCredentialsError(DomainException):
 class HabitNotFoundError(DomainException):
     def __init__(self) -> None:
         super().__init__("Habit not found")
+
+
+class HabitAlreadyLoggedError(DomainException):
+    def __init__(self) -> None:
+        super().__init__("Habit already logged for this date")
+
+
+class HabitArchivedError(DomainException):
+    def __init__(self) -> None:
+        super().__init__("Cannot log an archived habit")
+
+
+class FutureLogDateError(DomainException):
+    def __init__(self) -> None:
+        super().__init__("Cannot log habits for future dates")
