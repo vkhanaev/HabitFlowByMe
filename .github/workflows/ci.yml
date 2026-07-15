@@ -69,8 +69,22 @@ jobs:
       - name: Check for missing migrations
         run: uv run alembic check
 
-      - name: Run Tests
-        run: uv run pytest
+      - name: Run Tests & Generate HTML Report
+        if: always()
+        run: |
+          uv run pytest \
+            -v \
+            --tb=short \
+            --html=pytest-report.html \
+           --self-contained-html
+
+      - name: Upload Test Report Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-${{ github.run_id }}
+          path: pytest-report.html
+          retention-days: 7 # Хранить отчет 7 дней, чтобы не забивать хранилище GitHub
 
   docker:
     runs-on: ubuntu-latest
