@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HabitFlow{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/app.css">
+
+    <!-- Добавляем HTMX -->
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="logo">HabitFlow</a>
+            <div class="navbar-links">
+                {% if user %}
+                    <span style="color: var(--color-text-muted); margin-right: 1rem;">{{ user.email }}</span>
+                    <form action="/logout" method="post" style="display: inline;">
+                        <button type="submit" style="background: none; border: none; color: var(--color-text-muted); cursor: pointer; font-size: 0.9rem; padding: 0;">
+                            Выйти
+                        </button>
+                </form>
+                {% else %}
+                    <a href="/login">Войти</a>
+                    <a href="/register" class="btn">Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% if error %}
+            <div class="alert alert-error">{{ error }}</div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
