@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Мои привычки - HabitFlow{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h1 style="font-size: 1.5rem; font-weight: 700;">Мои привычки</h1>
+    <a href="/habits/create" class="btn" style="width: auto; padding: 0.5rem 1rem; text-decoration: none;">
+        + Новая привычка
+    </a>
+</div>
+
+{% if not habits_with_data %}
+    <div class="card" style="text-align: center; color: var(--color-text-muted); max-width: 100%;">
+        <p style="font-size: 1.125rem; margin-bottom: 0.5rem;">У вас пока нет привычек.</p>
+        <p>Создайте первую, чтобы начать отслеживать прогресс!</p>
+    </div>
+{% else %}
+    <div style="display: grid; gap: 1.5rem;">
+        {% for item in habits_with_data %}
+            <!-- Карточка привычки с уникальным ID для HTMX -->
+            <div id="habit-card-{{ item.habit.id }}" class="card" style="max-width: 100%; margin: 0;">
+
+                <!-- Заголовок привычки -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                    <div style="flex: 1;">
+                        <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem;">
+                            {{ item.habit.title }}
+                        </h3>
+                        {% if item.habit.description %}
+                            <p style="color: var(--color-text-muted); font-size: 0.875rem;">
+                                {{ item.habit.description }}
+                            </p>
+                        {% endif %}
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <a href="/habits/{{ item.habit.id }}/edit" class="btn btn-secondary" style="width: auto; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                            Редактировать
+                        </a>
+                        <form action="/habits/{{ item.habit.id }}/delete" method="post" onsubmit="return confirm('Удалить привычку?');">
+                            <button type="submit" class="btn btn-secondary" style="width: auto; padding: 0.5rem 1rem; font-size: 0.875rem; color: var(--color-danger);">
+                                Удалить
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Календарь выполнений за текущий месяц -->
+    <div style="margin-bottom: 1rem;">
+        <!-- Дни месяца -->
+        <div style="display: grid; grid-template-columns: repeat(31, 1fr); gap: 2px; margin-bottom: 0.5rem;">
+            {% for day in range(1, 32) %}
+                <div style="text-align: center; font-size: 0.625rem; color: var(--color-text-muted);">
+                    {{ day }}
+                </div>
+            {% endfor %}
+        </div>
+
+                    <!-- Кликабельные ячейки -->
+                    <div style="display: grid; grid-template-columns: repeat(31, 1fr); gap: 2px;">
+                        {% for day in range(1, 32) %}
+                            {% set is_completed = item.calendar.get(day, False) %}
+                            {% set is_future = day > today.day %}
+
+                            {% if is_future %}
+                                <!-- Будущий день - неактивная кнопка -->
+                                <button
+                                    disabled
+                                    style="
+                                        height: 12px;
+                                        width: 100%;
+                                        padding: 0;
+                                        margin: 0;
+                                        border-radius: 2px;
+                                        background-color: #f3f4f6;
+                                        border: 1px solid #e5e7eb;
+                                        cursor: not-allowed;
+                                        opacity: 0.5;
+                                    "
+                                    title="Будущий день - недоступно"
+                                ></button>
+                            {% else %}
+                                <!-- Прошедший или сегодняшний день - кликабельная кнопка -->
+                                <button
+                                    style="
+                                        height: 12px;
+                                        width: 100%;
+                                        padding: 0;
+                                        margin: 0;
+                                        border-radius: 2px;
+                                        cursor: pointer;
+                                        transition: all 0.2s;
+                                        background-color: {{ 'var(--color-success)' if is_completed else 'var(--color-bg)' }};
+                                        border: 1px solid {{ 'var(--color-success)' if is_completed else '#d1d5db' }};
+                                    "
+                                    title="День {{ day }}: {{ '✓ Выполнено (нажмите для отмены)' if is_completed else '○ Не выполнено (нажмите для отметки)' }}"
+                                    hx-post="/habits/{{ item.habit.id }}/toggle-date"
+                                    hx-target="#habit-card-{{ item.habit.id }}"
+                                    hx-swap="outerHTML"
+                                    hx-vals='{"date_str": "{{ today.replace(day=day).isoformat() }}"}'
+                                ></button>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Статистика -->
+<!-- Статистика -->
+<div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+    <div style="display: flex; gap: 1rem; font-size: 0.875rem; color: var(--color-text-muted);">
+        <span>🔥 {{ item.stats.current_streak }} дн. подряд</span>
+        <span>✓ {{ item.stats.total_logs }} всего</span>
+    </div>
+
+    <!-- Добавляем ссылку на статистику -->
+    <a href="/habits/{{ item.habit.id }}/stats" style="font-size: 0.875rem; color: var(--color-primary); text-decoration: none;">
+        Подробнее →
+    </a>
+</div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<!-- Легенда -->
+<div style="margin-top: 1.5rem; padding: 1rem; background: var(--color-card); border-radius: var(--radius); display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--color-text-muted); flex-wrap: wrap;">
+    <span>Легенда:</span>
+    <div style="width: 12px; height: 12px; border-radius: 2px; background: var(--color-success); border: 1px solid var(--color-success);"></div>
+    <span>Выполнено</span>
+    <div style="width: 12px; height: 12px; border-radius: 2px; background: var(--color-bg); border: 1px solid #d1d5db;"></div>
+    <span>Не выполнено</span>
+    <div style="width: 12px; height: 12px; border-radius: 2px; background: #f3f4f6; border: 1px solid #e5e7eb; opacity: 0.5;"></div>
+    <span>Будущий день</span>
+</div>
+{% endblock %}

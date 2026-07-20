@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}{{ habit.title }} - Статистика{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.5rem;">
+    <a href="/habits" style="color: var(--color-primary); text-decoration: none; font-size: 0.875rem;">
+        ← Назад к списку привычек
+    </a>
+</div>
+
+<div class="card" style="max-width: 100%; margin-bottom: 1.5rem;">
+    <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">
+        {{ habit.title }}
+    </h1>
+    {% if habit.description %}
+        <p style="color: var(--color-text-muted); font-size: 0.875rem;">
+            {{ habit.description }}
+        </p>
+    {% endif %}
+</div>
+
+<!-- Общая статистика -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+    <div class="card" style="margin: 0; text-align: center;">
+        <div style="font-size: 2rem; font-weight: 700; color: var(--color-primary);">
+            {{ stats.current_streak }}
+        </div>
+        <div style="font-size: 0.875rem; color: var(--color-text-muted);">
+            🔥 Дней подряд
+        </div>
+    </div>
+
+    <div class="card" style="margin: 0; text-align: center;">
+        <div style="font-size: 2rem; font-weight: 700; color: var(--color-success);">
+            {{ stats.total_logs }}
+        </div>
+        <div style="font-size: 0.875rem; color: var(--color-text-muted);">
+            ✓ Всего выполнений
+        </div>
+    </div>
+
+    <div class="card" style="margin: 0; text-align: center;">
+        <div style="font-size: 2rem; font-weight: 700; color: var(--color-primary);">
+            {{ "%.0f"|format(completion_rate) }}%
+        </div>
+        <div style="font-size: 0.875rem; color: var(--color-text-muted);">
+             За последние 31 день
+        </div>
+    </div>
+</div>
+
+<!-- Скользящее окно за 31 день -->
+<div class="card" style="max-width: 100%;">
+    <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">
+        Последние 31 день
+    </h2>
+
+    <!-- Календарь -->
+    <div style="margin-bottom: 1rem;">
+        <!-- Дни и месяцы -->
+        <div style="display: grid; grid-template-columns: repeat(31, 1fr); gap: 2px; margin-bottom: 0.5rem;">
+            {% for item in sliding_calendar %}
+                <div style="text-align: center; font-size: 0.625rem; color: var(--color-text-muted);">
+                    {{ item.day }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Месяцы -->
+        <div style="display: grid; grid-template-columns: repeat(31, 1fr); gap: 2px; margin-bottom: 0.5rem;">
+            {% for item in sliding_calendar %}
+                <div style="text-align: center; font-size: 0.5rem; color: var(--color-text-muted);">
+                    {{ item.month }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Кликабельные ячейки -->
+        <div style="display: grid; grid-template-columns: repeat(31, 1fr); gap: 2px;">
+            {% for item in sliding_calendar %}
+                {% if item.is_future %}
+                    <!-- Будущий день - неактивный -->
+                    <button
+                        disabled
+                        style="
+                            height: 12px;
+                            width: 100%;
+                            padding: 0;
+                            margin: 0;
+                            border-radius: 2px;
+                            background-color: #f3f4f6;
+                            border: 1px solid #e5e7eb;
+                            cursor: not-allowed;
+                            opacity: 0.5;
+                        "
+                        title="{{ item.date.isoformat() }} - Будущий день"
+                    ></button>
+                {% else %}
+                    <!-- Прошедший или сегодняшний день - кликабельный -->
+                    <button
+                        style="
+                            height: 12px;
+                            width: 100%;
+                            padding: 0;
+                            margin: 0;
+                            border-radius: 2px;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                            background-color: {{ 'var(--color-success)' if item.is_completed else 'var(--color-bg)' }};
+                            border: 1px solid {{ 'var(--color-success)' if item.is_completed else '#d1d5db' }};
+                        "
+                        title="{{ item.date.isoformat() }}: {{ '✓ Выполнено' if item.is_completed else '○ Не выполнено' }}"
+                        hx-post="/habits/{{ habit.id }}/toggle-date"
+                        hx-target="#sliding-calendar"
+                        hx-swap="outerHTML"
+                        hx-vals='{"date_str": "{{ item.date.isoformat() }}"}'
+                    ></button>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Легенда -->
+    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--color-text-muted); flex-wrap: wrap; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+        <span>Легенда:</span>
+        <div style="width: 12px; height: 12px; border-radius: 2px; background: var(--color-success); border: 1px solid var(--color-success);"></div>
+        <span>Выполнено</span>
+        <div style="width: 12px; height: 12px; border-radius: 2px; background: var(--color-bg); border: 1px solid #d1d5db;"></div>
+        <span>Не выполнено</span>
+        <div style="width: 12px; height: 12px; border-radius: 2px; background: #f3f4f6; border: 1px solid #e5e7eb; opacity: 0.5;"></div>
+        <span>Будущий день</span>
+    </div>
+</div>
+
+<!-- Действия -->
+<div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+    <a href="/habits/{{ habit.id }}/edit" class="btn btn-secondary" style="width: auto; padding: 0.5rem 1rem;">
+        Редактировать
+    </a>
+    <form action="/habits/{{ habit.id }}/delete" method="post" onsubmit="return confirm('Удалить привычку?');">
+        <button type="submit" class="btn btn-secondary" style="width: auto; padding: 0.5rem 1rem; color: var(--color-danger);">
+            Удалить
+        </button>
+    </form>
+</div>
+{% endblock %}

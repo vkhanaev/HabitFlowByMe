@@ -1,0 +1,49 @@
+<div id="calendar-{{ habit_id }}" style="margin-bottom: 1rem;">
+    <!-- Числа (дни месяца) -->
+    <div style="display: grid; grid-template-columns: repeat(31, 1fr); gap: 2px; margin-bottom: 0.5rem;">
+        {% for item in calendar_data %}
+            <div style="text-align: center; font-size: 0.625rem; color: var(--color-text-muted);">
+                {{ item.day }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Кликабельные ячейки -->
+    <div style="display: grid; grid-template-columns: repeat(31, 1fr); gap: 2px;">
+        {% for item in calendar_data %}
+            {% if item.is_future %}
+                <!-- Будущее: просто серый квадрат -->
+                <button
+                    disabled
+                    style="
+                        height: 12px; width: 100%; padding: 0; margin: 0;
+                        border-radius: 2px; background-color: #f3f4f6;
+                        border: 1px solid #e5e7eb; cursor: not-allowed; opacity: 0.5;
+                    "
+                ></button>
+            {% else %}
+                <!-- Прошлое/Сегодня: форма с HTMX -->
+                <form
+                    hx-post="/habits/{{ habit_id }}/toggle-date"
+                    hx-target="#calendar-{{ habit_id }}"
+                    hx-swap="outerHTML"
+                    style="display: contents;"
+                >
+                    <!-- Передаем полную дату! -->
+                    <input type="hidden" name="date_str" value="{{ item.date.isoformat() }}">
+
+                    <button
+                        type="submit"
+                        style="
+                            height: 12px; width: 100%; padding: 0; margin: 0;
+                            border-radius: 2px; cursor: pointer; transition: all 0.2s;
+                            background-color: {{ 'var(--color-success)' if item.is_completed else 'var(--color-bg)' }};
+                            border: 1px solid {{ 'var(--color-success)' if item.is_completed else '#d1d5db' }};
+                        "
+                        title="{{ item.date.isoformat() }}: {{ 'Выполнено' if item.is_completed else 'Не выполнено' }}"
+                    ></button>
+                </form>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>

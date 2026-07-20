@@ -91,3 +91,11 @@ async def get_habit_stats(
     user: User = Depends(get_current_user),
 ) -> HabitStatsResponse:
     return await service.get_habit_stats(habit_id, user.id)
+
+
+@router.get("/dashboard", response_model=list[HabitResponse])
+async def list_habits_dashboard(
+    service: HabitService = Depends(get_habit_service),
+    user: User = Depends(get_current_user),
+) -> list[HabitResponse]:
+    return await service.list_habits_dashboard(user.id)

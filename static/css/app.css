@@ -48,3 +48,44 @@ body {
 
 .alert { padding: 0.75rem; border-radius: var(--radius); margin-bottom: 1rem; font-size: 0.875rem; }
 .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+
+
+/* Анимация для календаря */
+.habit-calendar-day {
+    transition: all 0.2s ease;
+}
+
+.habit-calendar-day:hover {
+    transform: scale(1.2);
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .habit-calendar-grid {
+        grid-template-columns: repeat(31, 1fr);
+        font-size: 0.5rem;
+    }
+
+    .habit-calendar-day {
+        height: 8px;
+    }
+}

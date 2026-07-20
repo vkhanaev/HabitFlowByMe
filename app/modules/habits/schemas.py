@@ -18,6 +18,8 @@ class HabitResponse(BaseModel):
     title: str
     description: str | None
     is_archived: bool
+    current_streak: int = 0
+    completed_today: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 

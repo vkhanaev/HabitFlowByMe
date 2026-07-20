@@ -1,6 +1,8 @@
 import datetime
+from collections import defaultdict
+from typing import Any
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -81,3 +83,91 @@ class HabitRepository:
         stmt = select(func.count(HabitLog.id)).where(HabitLog.habit_id == habit_id)
         result = await self.db.execute(stmt)
         return int(result.scalar_one())
+
+    async def get_habits_with_stats(self, user_id: int) -> list[dict[str, Any]]:
+        """Эффективно получает привычки и их статистику за 2 запроса (решение N+1)."""
+        # 1. Получаем привычки
+        stmt = select(Habit).where(
+            Habit.user_id == user_id, Habit.is_archived.is_(False)
+        )
+        result = await self.db.execute(stmt)
+        habits = list(result.scalars().all())
+
+        if not habits:
+            return []
+
+        habit_ids = [h.id for h in habits]
+        today = datetime.date.today()
+
+        # 2. Получаем все логи для этих привычек одним запросом
+        logs_stmt = (
+            select(HabitLog.habit_id, HabitLog.log_date)
+            .where(HabitLog.habit_id.in_(habit_ids))
+            .order_by(HabitLog.log_date.desc())
+        )
+        logs_result = await self.db.execute(logs_stmt)
+        logs = logs_result.all()
+
+        # 3. Группируем логи по habit_id в памяти (это очень быстро)
+        habit_logs_map = defaultdict(list)
+        for log in logs:
+            habit_logs_map[log.habit_id].append(log.log_date)
+
+        # 4. Собираем итоговый результат
+        result_data = []
+        for habit in habits:
+            dates = habit_logs_map.get(habit.id, [])
+
+            # Используем ту же логику расчета стрика, что и в сервисе (можно вынести в утилиту)
+            streak = 0
+            if dates and dates[0] >= today - datetime.timedelta(days=1):
+                streak = 1
+                for i in range(1, len(dates)):
+                    if dates[i - 1] - dates[i] == datetime.timedelta(days=1):
+                        streak += 1
+                    else:
+                        break
+
+            result_data.append(
+                {
+                    "habit": habit,
+                    "current_streak": streak,
+                    "completed_today": today in dates,
+                }
+            )
+
+        return result_data
+
+    async def is_logged_on_date(self, habit_id: int, date: datetime.date) -> bool:
+        """Проверяет, есть ли лог за указанную дату."""
+        stmt = select(HabitLog.id).where(
+            HabitLog.habit_id == habit_id, HabitLog.log_date == date
+        )
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none() is not None
+
+    async def delete_log_by_date(self, habit_id: int, date: datetime.date) -> bool:
+        """Удаляет лог за указанную дату. Возвращает True, если лог был удален."""
+        stmt = delete(HabitLog).where(
+            HabitLog.habit_id == habit_id, HabitLog.log_date == date
+        )
+        result = await self.db.execute(stmt)
+        rowcount = getattr(result, "rowcount", 0)
+        return bool(rowcount and rowcount > 0)
+
+    async def get_logs_for_period(
+        self, habit_id: int, start_date: datetime.date, end_date: datetime.date
+    ) -> list[datetime.date]:
+        """Получает все даты логов за указанный период."""
+        stmt = (
+            select(HabitLog.log_date)
+            .where(
+                HabitLog.habit_id == habit_id,
+                HabitLog.log_date >= start_date,
+                HabitLog.log_date <= end_date,
+            )
+            .order_by(HabitLog.log_date)
+        )
+
+        result = await self.db.execute(stmt)
+        return [row[0] for row in result.all()]

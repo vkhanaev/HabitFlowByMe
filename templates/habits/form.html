@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}
+    {% if habit %}Редактировать привычку{% else %}Новая привычка{% endif %} - HabitFlow
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px;">
+    <h2 style="text-align: center; margin-bottom: 1.5rem;">
+        {% if habit %}Редактировать привычку{% else %}Новая привычка{% endif %}
+    </h2>
+
+    {% if error %}
+        <div class="alert alert-error" style="margin-bottom: 1rem;">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form action="{% if habit %}/habits/{{ habit.id }}{% else %}/habits{% endif %}" method="post">
+        <div class="form-group">
+            <label for="title">Название</label>
+            <input
+                type="text"
+                id="title"
+                name="title"
+                value="{{ title if title is defined else (habit.title if habit else '') }}"
+                required
+                maxlength="255"
+                placeholder="Например: Читать 10 страниц"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="description">Описание (необязательно)</label>
+            <textarea
+                id="description"
+                name="description"
+                rows="4"
+                maxlength="1000"
+                placeholder="Зачем вам эта привычка?"
+            >{{ description if description is defined else (habit.description if habit and habit.description else '') }}</textarea>
+        </div>
+
+        <button type="submit" class="btn">
+            {% if habit %}Сохранить изменения{% else %}Создать привычку{% endif %}
+        </button>
+
+        <a href="/habits" class="btn btn-secondary" style="display: block; text-align: center; margin-top: 0.5rem;">
+            Отмена
+        </a>
+    </form>
+</div>
+{% endblock %}

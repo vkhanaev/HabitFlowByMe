@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Form, Request, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
 from app.core.exceptions import InvalidCredentialsError, UserAlreadyExistsError
 from app.modules.users.di import get_auth_service
@@ -14,13 +14,13 @@ async def login_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(request, "auth/login.html")
 
 
-@router.post("/login")
+@router.post("/login", response_model=None)
 async def login_submit(
     request: Request,
     email: str = Form(...),
     password: str = Form(...),
     service: AuthService = Depends(get_auth_service),
-) -> RedirectResponse | HTMLResponse:
+) -> Response:
     try:
         # Наш сервис ожидает username, но для нас это email
         token = await service.login(username=email, password=password)
@@ -51,13 +51,13 @@ async def register_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(request, "auth/register.html")
 
 
-@router.post("/register")
+@router.post("/register", response_model=None)
 async def register_submit(
     request: Request,
     email: str = Form(...),
     password: str = Form(...),
     service: AuthService = Depends(get_auth_service),
-) -> RedirectResponse | HTMLResponse:
+) -> Response:
     try:
         await service.register(email=email, password=password)
         return RedirectResponse(
@@ -72,8 +72,8 @@ async def register_submit(
         )
 
 
-@router.post("/logout")
-async def logout() -> RedirectResponse:
+@router.post("/logout", response_model=None)
+async def logout() -> Response:
     response = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
     response.delete_cookie("access_token")
     return response

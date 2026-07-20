@@ -1,0 +1,78 @@
+<div id="habit-card-{{ item.habit.id }}" class="card" style="max-width: 100%; margin: 0;">
+
+                <!-- Заголовок -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                    <div style="flex: 1;">
+                        <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem;">
+                            {{ item.habit.title }}
+                        </h3>
+                        {% if item.habit.description %}
+                            <p style="color: var(--color-text-muted); font-size: 0.875rem;">
+                                {{ item.habit.description }}
+                            </p>
+                        {% endif %}
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <a href="/habits/{{ item.habit.id }}/edit" class="btn btn-secondary" style="width: auto; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                            Редактировать
+                        </a>
+                        <form action="/habits/{{ item.habit.id }}/delete" method="post" onsubmit="return confirm('Удалить привычку?');">
+                            <button type="submit" class="btn btn-secondary" style="width: auto; padding: 0.5rem 1rem; font-size: 0.875rem; color: var(--color-danger);">
+                                Удалить
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Скользящее окно (31 день) -->
+                <div style="margin-bottom: 1rem;">
+                    <!-- Числа (дни месяца) -->
+                    <div style="display: grid; grid-template-columns: repeat(31, 1fr); gap: 2px; margin-bottom: 0.5rem;">
+                        {% for day_item in item.sliding_calendar %}
+                            <div style="text-align: center; font-size: 0.625rem; color: var(--color-text-muted);">
+                                {{ day_item.day }}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Кликабельные ячейки -->
+                    <div style="display: grid; grid-template-columns: repeat(31, 1fr); gap: 2px;">
+                        {% for day_item in item.sliding_calendar %}
+                            {% if day_item.is_future %}
+                                <!-- Будущий день (если вдруг попадет в окно) -->
+                                <button
+                                    disabled
+                                    style="
+                                        height: 12px; width: 100%; padding: 0; margin: 0;
+                                        border-radius: 2px; background-color: #f3f4f6;
+                                        border: 1px solid #e5e7eb; cursor: not-allowed; opacity: 0.5;
+                                    "
+                                ></button>
+                            {% else %}
+                                <!-- Прошедший день или сегодня -->
+                                <button
+                                    style="
+                                        height: 12px; width: 100%; padding: 0; margin: 0;
+                                        border-radius: 2px; cursor: pointer; transition: all 0.2s;
+                                        background-color: {{ 'var(--color-success)' if day_item.is_completed else 'var(--color-bg)' }};
+                                        border: 1px solid {{ 'var(--color-success)' if day_item.is_completed else '#d1d5db' }};
+                                    "
+                                    title="{{ day_item.date.isoformat() }}: {{ 'Выполнено' if day_item.is_completed else 'Не выполнено' }}"
+                                    hx-post="/habits/{{ item.habit.id }}/toggle-date-sliding"
+                                    hx-target="#habit-card-{{ item.habit.id }}"
+                                    hx-swap="outerHTML"
+                                    hx-vals='{"date_str": "{{ day_item.date.isoformat() }}"}'
+                                ></button>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Статистика -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                    <div style="display: flex; gap: 1rem; font-size: 0.875rem; color: var(--color-text-muted);">
+                        <span>🔥 {{ item.stats.current_streak }} дн. подряд</span>
+                        <span>✓ {{ item.stats.total_logs }} всего</span>
+                    </div>
+                </div>
+            </div>
